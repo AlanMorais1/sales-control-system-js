@@ -10,10 +10,11 @@
 
   <div class="dashboard-container">
     
-    <!-- Barra Lateral (Formulário e Regras) -->
+    <!-- Barra Lateral (Formulário e Configurações) -->
     <aside class="sidebar">
       <h2>Agência de Turismo</h2>
       
+      <!-- Lançamento de Vendas -->
       <div class="card form-card">
         <h3>Nova Venda</h3>
         <form id="formVenda">
@@ -26,6 +27,12 @@
           <label for="vendedor">Nome do Vendedor</label>
           <input type="text" id="vendedor" placeholder="Ex: Carlos" required>
           
+          <label for="tipoVenda">Tipo de Venda</label>
+          <select id="tipoVenda" required>
+            <option value="hospedagem">🏨 Hospedagem</option>
+            <option value="servico">✈️ Serviços (Aéreo, Transfer, etc)</option>
+          </select>
+
           <label for="dataVenda">Data da Venda</label>
           <input type="date" id="dataVenda" required>
           
@@ -36,12 +43,33 @@
         </form>
       </div>
 
+      <!-- Configuração de Ciclo -->
+      <div class="card config-card">
+        <h3>Ciclo de Comissão</h3>
+        <div class="input-group">
+          <div>
+            <label>Dia Abertura</label>
+            <input type="number" id="diaAbertura" min="1" max="31" value="26">
+          </div>
+          <div>
+            <label>Dia Fechamento</label>
+            <input type="number" id="diaFechamento" min="1" max="31" value="25">
+          </div>
+        </div>
+        <button onclick="salvarConfigCiclo()" class="btn-salvar">Salvar Ciclo</button>
+        <small>Define de quando até quando um mês é contabilizado.</small>
+      </div>
+
       <div class="card regras-card">
         <h3>Regras de Comissão</h3>
         <ul>
-          <li>Até R$ 100.000: <strong>3%</strong></li>
-          <li>De R$ 101.000 a R$ 180.000: <strong>4%</strong></li>
-          <li>Acima de R$ 181.000: <strong>5%</strong></li>
+          <li><strong>Serviços:</strong> Fixo em 3%</li>
+          <li><strong>Hospedagem (Variável):</strong></li>
+          <ul>
+            <li>Até R$ 100 mil: <strong>3%</strong></li>
+            <li>De 100k a 180k: <strong>4%</strong></li>
+            <li>Acima de 180k: <strong>5%</strong></li>
+          </ul>
         </ul>
       </div>
     </aside>
@@ -49,16 +77,15 @@
     <!-- Conteúdo Principal -->
     <main class="main-content">
       <header>
-        <h1>Controle Anual - <span id="anoAtual"></span></h1>
+        <h1>Controle Anual de Ciclos - <span id="anoAtual"></span></h1>
         
-        <!-- Navegação por Abas -->
         <nav class="tabs">
-          <button class="tab-btn active" onclick="mudarAba('dashboard')">📊 Resumo de Meses</button>
-          <button class="tab-btn" onclick="mudarAba('clientes')">👥 Clientes Cadastrados</button>
+          <button class="tab-btn active" onclick="mudarAba('dashboard')">📊 Dashboard Resumo</button>
+          <button class="tab-btn" onclick="mudarAba('clientes')">👥 Vendas por Ciclo</button>
         </nav>
       </header>
 
-      <!-- ABA 1: Dashboard de Meses -->
+      <!-- ABA 1: Dashboard Resumo -->
       <div id="aba-dashboard" class="aba-content">
         <div class="meses-grid" id="mesesGrid">
           <!-- Gerado via JavaScript -->
@@ -67,25 +94,21 @@
 
       <!-- ABA 2: Lista de Clientes -->
       <div id="aba-clientes" class="aba-content hidden">
-        
         <div class="clientes-header">
-          <h2>Visualizar Clientes</h2>
+          <h2>Visualizar Vendas por Ciclo</h2>
           <div class="filtro-container">
-            <label for="filtroMes">Selecione o Mês: </label>
+            <label for="filtroMes">Selecione o Mês do Ciclo: </label>
             <select id="filtroMes" onchange="renderizarListaClientes()">
-              <!-- Opções geradas pelo JavaScript -->
+              <!-- Opções geradas pelo JS -->
             </select>
           </div>
         </div>
-
         <div class="clientes-container" id="clientesGrid">
           <!-- Gerado via JavaScript -->
         </div>
-
       </div>
 
     </main>
-
   </div>
 
   <script src="script.js"></script>
