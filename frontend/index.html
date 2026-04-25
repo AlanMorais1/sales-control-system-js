@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema - Agência de Turismo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="dashboard-container">
+    
+    <!-- Barra Lateral (Formulário e Regras) -->
+    <aside class="sidebar">
+      <h2>Agência de Turismo</h2>
+      
+      <div class="card form-card">
+        <h3>Nova Venda</h3>
+        <form id="formVenda">
+          <label for="idVendaInput">ID da Venda / Localizador</label>
+          <input type="text" id="idVendaInput" placeholder="Ex: LOC-12345" required>
+
+          <label for="cliente">Nome do Cliente</label>
+          <input type="text" id="cliente" placeholder="Ex: João da Silva" required>
+
+          <label for="vendedor">Nome do Vendedor</label>
+          <input type="text" id="vendedor" placeholder="Ex: Carlos" required>
+          
+          <label for="dataVenda">Data da Venda</label>
+          <input type="date" id="dataVenda" required>
+          
+          <label for="valor">Valor da Venda (R$)</label>
+          <input type="number" id="valor" step="0.01" placeholder="Ex: 1500.00" required>
+          
+          <button type="submit" class="btn-adicionar">Adicionar Venda</button>
+        </form>
+      </div>
+
+      <div class="card regras-card">
+        <h3>Regras de Comissão</h3>
+        <ul>
+          <li>Até R$ 100.000: <strong>3%</strong></li>
+          <li>De R$ 101.000 a R$ 180.000: <strong>4%</strong></li>
+          <li>Acima de R$ 181.000: <strong>5%</strong></li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+      <header>
+        <h1>Controle Anual - <span id="anoAtual"></span></h1>
+        
+        <!-- Navegação por Abas -->
+        <nav class="tabs">
+          <button class="tab-btn active" onclick="mudarAba('dashboard')">📊 Resumo de Meses</button>
+          <button class="tab-btn" onclick="mudarAba('clientes')">👥 Clientes Cadastrados</button>
+        </nav>
+      </header>
+
+      <!-- ABA 1: Dashboard de Meses -->
+      <div id="aba-dashboard" class="aba-content">
+        <div class="meses-grid" id="mesesGrid">
+          <!-- Gerado via JavaScript -->
+        </div>
+      </div>
+
+      <!-- ABA 2: Lista de Clientes -->
+      <div id="aba-clientes" class="aba-content hidden">
+        
+        <div class="clientes-header">
+          <h2>Visualizar Clientes</h2>
+          <div class="filtro-container">
+            <label for="filtroMes">Selecione o Mês: </label>
+            <select id="filtroMes" onchange="renderizarListaClientes()">
+              <!-- Opções geradas pelo JavaScript -->
+            </select>
+          </div>
+        </div>
+
+        <div class="clientes-container" id="clientesGrid">
+          <!-- Gerado via JavaScript -->
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
