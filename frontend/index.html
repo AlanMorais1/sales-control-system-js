@@ -9,9 +9,12 @@
 <body>
   <div class="dashboard-container">
     <aside class="sidebar">
-      <div>
-        <p class="sidebar-label">Painel Comercial</p>
-        <h2>Agência de Turismo</h2>
+      <div class="sidebar-branding">
+        <img id="logoAgencia" class="agency-logo hidden" src="" alt="Logo da agência">
+        <div>
+          <p class="sidebar-label">Painel Comercial</p>
+          <h2 id="nomeAgencia">Agência de Turismo</h2>
+        </div>
       </div>
 
       <div class="card form-card">
@@ -28,7 +31,9 @@
             <input type="text" id="cliente" placeholder="Ex: João da Silva" required>
 
             <label for="vendedor">Nome do Vendedor</label>
-            <input type="text" id="vendedor" placeholder="Ex: Carlos" required>
+            <select id="vendedor" required>
+              <option value="">Selecione um vendedor</option>
+            </select>
 
             <label for="tipoVenda">Tipo de Venda</label>
             <select id="tipoVenda" required>
@@ -57,6 +62,7 @@
           <h1>Controle Comercial - <span id="anoAtual"></span></h1>
         </div>
         <div class="header-actions">
+          <button id="btnTema" class="btn-theme" title="Alternar tema">🌙</button>
           <button id="btnConfig" class="btn-config" title="Configurações">⚙️</button>
           <button id="btnAtualizar" class="btn-refresh">Atualizar dados</button>
         </div>
@@ -68,41 +74,88 @@
             <h3>Configurações</h3>
             <button id="btnCloseConfig" class="btn-close">✕</button>
           </div>
-          <div class="config-modal-body">
-            <div class="card config-card">
-              <h3>Configuração do Ciclo</h3>
-              <div class="input-group">
-                <div>
-                  <label>Dia Abertura</label>
-                  <input type="number" id="diaAbertura" min="1" max="31" value="26">
+          <div class="config-modal-inner">
+            <aside class="config-sidebar-tabs">
+              <button class="config-tab active" data-tab="ciclo">Ciclo</button>
+              <button class="config-tab" data-tab="vendedores">Vendedores</button>
+              <button class="config-tab" data-tab="agencia">Agência</button>
+              <button class="config-tab" data-tab="comissao">Comissão</button>
+            </aside>
+            <div class="config-modal-body">
+              <section class="config-section active" data-section="ciclo">
+                <div class="card config-card">
+                  <h3>Configuração do Ciclo</h3>
+                  <div class="input-group">
+                    <div>
+                      <label>Dia Abertura</label>
+                      <input type="number" id="diaAbertura" min="1" max="31" value="26">
+                    </div>
+                    <div>
+                      <label>Dia Fechamento</label>
+                      <input type="number" id="diaFechamento" min="1" max="31" value="25">
+                    </div>
+                  </div>
+                  <button onclick="salvarConfigCiclo()" class="btn-salvar">Salvar Ciclo</button>
                 </div>
-                <div>
-                  <label>Dia Fechamento</label>
-                  <input type="number" id="diaFechamento" min="1" max="31" value="25">
-                </div>
-              </div>
-              <button onclick="salvarConfigCiclo()" class="btn-salvar">Salvar Ciclo</button>
-            </div>
+              </section>
 
-            <div class="card regras-card">
-              <h3>Regras de Comissão</h3>
-              <div class="rule-grid">
-                <label>Serviços (%)</label>
-                <input type="number" id="taxaServico" step="0.1" min="0">
-              </div>
-              <div class="rule-grid">
-                <label>Até <span id="limiar1Label">100 mil</span> (%)</label>
-                <input type="number" id="taxaBase" step="0.1" min="0">
-              </div>
-              <div class="rule-grid">
-                <label>Até <span id="limiar2Label">180 mil</span> (%)</label>
-                <input type="number" id="taxaIntermediaria" step="0.1" min="0">
-              </div>
-              <div class="rule-grid">
-                <label>Acima de <span id="limiar3Label">180 mil</span> (%)</label>
-                <input type="number" id="taxaAlta" step="0.1" min="0">
-              </div>
-              <button onclick="salvarConfigComissao()" class="btn-salvar">Salvar Regras</button>
+              <section class="config-section" data-section="vendedores">
+                <div class="card vendedores-card">
+                  <h3>Vendedores</h3>
+                  <div class="input-group vertical">
+                    <div>
+                      <label for="novoVendedor">Novo vendedor</label>
+                      <input type="text" id="novoVendedor" placeholder="Ex: Carlos Oliveira">
+                    </div>
+                  </div>
+                  <button type="button" onclick="adicionarVendedor()" class="btn-salvar">Adicionar vendedor</button>
+                  <div id="listaVendedores" class="lista-vendedores"></div>
+                </div>
+              </section>
+
+              <section class="config-section" data-section="agencia">
+                <div class="card branding-card">
+                  <h3>Identidade da Agência</h3>
+                  <div class="input-group vertical">
+                    <div>
+                      <label for="nomeAgenciaInput">Nome da agência</label>
+                      <input type="text" id="nomeAgenciaInput" placeholder="Ex: Agência de Turismo">
+                    </div>
+                    <div>
+                      <label for="fotoAgenciaInput">URL da foto</label>
+                      <input type="url" id="fotoAgenciaInput" placeholder="https://...">
+                    </div>
+                    <div>
+                      <label for="fotoAgenciaFile">Ou escolher imagem</label>
+                      <input type="file" id="fotoAgenciaFile" accept="image/*">
+                    </div>
+                  </div>
+                  <button type="button" onclick="salvarConfigAgencia()" class="btn-salvar">Salvar identidade</button>
+                </div>
+              </section>
+
+              <section class="config-section" data-section="comissao">
+                <div class="card regras-card">
+                  <h3>Regras de Comissão</h3>
+                  <div class="rule-grid">
+                    <label>Serviços (%)</label>
+                    <input type="number" id="taxaServico" step="0.1" min="0">
+                  </div>
+                  <div class="rule-grid">
+                    <label>Até <span id="limiar1Label">100 mil</span> (%)</label>
+                    <input type="number" id="taxaBase" step="0.1" min="0">
+                  </div>
+                  <div class="rule-grid">
+                    <label>Até <span id="limiar2Label">180 mil</span> (%)</label>
+                    <input type="number" id="taxaIntermediaria" step="0.1" min="0">
+                  </div>
+                  <div class="rule-grid">
+                    <label>Acima de <span id="limiar3Label">180 mil</span> (%)</label>
+                    <input type="number" id="taxaAlta" step="0.1" min="0">
+                  </div>
+                  <button type="button" onclick="salvarConfigComissao()" class="btn-salvar">Salvar Regras</button>
+                </div>
+              </section>
             </div>
           </div>
         </div>

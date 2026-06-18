@@ -11,10 +11,16 @@ let configComissao = JSON.parse(localStorage.getItem('configComissaoTurismo')) |
   limiteBase: 100000,
   limiteAlta: 180000,
 };
+let configAgencia = JSON.parse(localStorage.getItem('configAgenciaTurismo')) || {
+  nome: 'Agência de Turismo',
+  logo: ''
+};
+let vendedores = JSON.parse(localStorage.getItem('vendedoresTurismo')) || [];
 let leadsPorMes = JSON.parse(localStorage.getItem('leadsPorMesTurismo')) || {};
 let metasPorMes = JSON.parse(localStorage.getItem('metasPorMesTurismo')) || {};
 let metasPainelVisivel = false;
 let leadsPainelVisivel = false;
+let temaAtual = localStorage.getItem('temaTurismo') || 'light';
 
 const nomesMeses = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -121,6 +127,136 @@ function salvarConfigComissao() {
   localStorage.setItem('configComissaoTurismo', JSON.stringify(configComissao));
   alert('Regras de comissão atualizadas com sucesso.');
   atualizarTelas();
+}
+
+function salvarConfigAgencia() {
+  const nome = document.getElementById('nomeAgenciaInput').value.trim();
+  const logo = document.getElementById('fotoAgenciaInput').value.trim();
+
+  configAgencia = {
+    nome: nome || 'Agência de Turismo',
+    logo: logo || configAgencia.logo || ''
+  };
+
+  localStorage.setItem('configAgenciaTurismo', JSON.stringify(configAgencia));
+  atualizarBranding();
+  alert('Identidade da agência atualizada com sucesso.');
+}
+
+function adicionarVendedor() {
+  const input = document.getElementById('novoVendedor');
+  const nome = input.value.trim();
+
+  if (!nome) {
+    alert('Digite o nome do vendedor antes de adicionar.');
+    return;
+  }
+
+  const jaExiste = vendedores.some((v) => v.toLowerCase() === nome.toLowerCase());
+  if (jaExiste) {
+    alert('Esse vendedor já está cadastrado.');
+    return;
+  }
+
+  vendedores = [...vendedores, nome];
+  localStorage.setItem('vendedoresTurismo', JSON.stringify(vendedores));
+  input.value = '';
+  renderizarListaVendedores();
+  popularSelectVendedores();
+  alert('Vendedor cadastrado com sucesso.');
+}
+
+function removerVendedor(nome) {
+  if (!confirm(`Deseja excluir o vendedor "${nome}"?`)) {
+    return;
+  }
+
+  vendedores = vendedores.filter((v) => v !== nome);
+  localStorage.setItem('vendedoresTurismo', JSON.stringify(vendedores));
+  renderizarListaVendedores();
+  popularSelectVendedores();
+}
+
+function renderizarListaVendedores() {
+  const container = document.getElementById('listaVendedores');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  if (vendedores.length === 0) {
+    container.innerHTML = '<p class="msg-vazia">Nenhum vendedor cadastrado.</p>';
+    return;
+  }
+
+  vendedores.forEach((nome) => {
+    const item = document.createElement('div');
+    item.className = 'vendedor-chip';
+
+    const nomeSpan = document.createElement('span');
+    nomeSpan.textContent = nome;
+
+    const btnExcluir = document.createElement('button');
+    btnExcluir.type = 'button';
+    btnExcluir.className = 'btn-remove-vendedor';
+    btnExcluir.textContent = '✕';
+    btnExcluir.title = `Excluir ${nome}`;
+    btnExcluir.addEventListener('click', () => removerVendedor(nome));
+
+    item.appendChild(nomeSpan);
+    item.appendChild(btnExcluir);
+    container.appendChild(item);
+  });
+}
+
+function popularSelectVendedores() {
+  const select = document.getElementById('vendedor');
+  if (!select) return;
+
+  const valorAtual = select.value;
+  select.innerHTML = '<option value="">Selecione um vendedor</option>';
+
+  vendedores.forEach((nome) => {
+    const option = document.createElement('option');
+    option.value = nome;
+    option.textContent = nome;
+    select.appendChild(option);
+  });
+
+  if (vendedores.includes(valorAtual)) {
+    select.value = valorAtual;
+  }
+}
+
+function atualizarBranding() {
+  const logoEl = document.getElementById('logoAgencia');
+  const nomeEl = document.getElementById('nomeAgencia');
+  if (logoEl) {
+    if (configAgencia.logo) {
+      logoEl.src = configAgencia.logo;
+      logoEl.classList.remove('hidden');
+    } else {
+      logoEl.removeAttribute('src');
+      logoEl.classList.add('hidden');
+    }
+  }
+  if (nomeEl) {
+    nomeEl.textContent = configAgencia.nome || 'Agência de Turismo';
+  }
+}
+
+function aplicarTema() {
+  document.body.dataset.theme = temaAtual;
+  const btnTema = document.getElementById('btnTema');
+  if (btnTema) {
+    btnTema.textContent = temaAtual === 'dark' ? '☀️' : '🌙';
+    btnTema.title = temaAtual === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro';
+  }
+}
+
+function alternarTema() {
+  temaAtual = temaAtual === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('temaTurismo', temaAtual);
+  aplicarTema();
 }
 
 function mudarAba(abaDestino) {
@@ -546,6 +682,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('dataVenda').value = dataHoje;
   document.getElementById('anoAtual').textContent = dataAtual.getFullYear();
 
+  aplicarTema();
+
   document.getElementById('diaAbertura').value = configCiclo.abertura;
   document.getElementById('diaFechamento').value = configCiclo.fechamento;
 
@@ -556,6 +694,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('limiar1Label').textContent = `${Math.round(configComissao.limiteBase / 1000)} mil`;
   document.getElementById('limiar2Label').textContent = `${Math.round(configComissao.limiteAlta / 1000)} mil`;
   document.getElementById('limiar3Label').textContent = `${Math.round(configComissao.limiteAlta / 1000)} mil`;
+  document.getElementById('nomeAgenciaInput').value = configAgencia.nome || '';
+  document.getElementById('fotoAgenciaInput').value = configAgencia.logo || '';
+  atualizarBranding();
+  renderizarListaVendedores();
+  popularSelectVendedores();
+
+  document.querySelectorAll('.config-tab').forEach((button) => {
+    button.addEventListener('click', () => {
+      const tab = button.dataset.tab;
+      document.querySelectorAll('.config-tab').forEach((btn) => btn.classList.remove('active'));
+      document.querySelectorAll('.config-section').forEach((section) => section.classList.remove('active'));
+      button.classList.add('active');
+      document.querySelector(`.config-section[data-section="${tab}"]`)?.classList.add('active');
+    });
+  });
 
   const selectMes = document.getElementById('filtroMes');
   selectMes.innerHTML = '<option value="todos">Todos os Ciclos</option>';
@@ -575,7 +728,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const idVenda = document.getElementById('idVendaInput').value.trim();
     const cliente = document.getElementById('cliente').value.trim();
-    const vendedor = document.getElementById('vendedor').value.trim();
+    const vendedor = document.getElementById('vendedor').value;
     const tipo = document.getElementById('tipoVenda').value;
     const data = document.getElementById('dataVenda').value;
     const valor = Number(document.getElementById('valor').value);
@@ -591,9 +744,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('formVenda').reset();
     document.getElementById('dataVenda').value = dataHoje;
     document.getElementById('tipoVenda').value = 'hospedagem';
+    popularSelectVendedores();
     alert('Venda lançada com sucesso!');
     await carregarVendas();
   });
+
+  document.getElementById('fotoAgenciaFile').addEventListener('change', (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      document.getElementById('fotoAgenciaInput').value = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('btnTema').addEventListener('click', alternarTema);
 
   document.getElementById('btnAtualizar').addEventListener('click', async () => {
     await carregarVendas();
