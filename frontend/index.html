@@ -3,111 +3,171 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema - Agência de Turismo</title>
+  <title>Sales Control System</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
   <div class="dashboard-container">
-    
-    <!-- Barra Lateral (Formulário e Configurações) -->
     <aside class="sidebar">
-      <h2>Agência de Turismo</h2>
-      
-      <!-- Lançamento de Vendas -->
+      <div>
+        <p class="sidebar-label">Painel Comercial</p>
+        <h2>Agência de Turismo</h2>
+      </div>
+
       <div class="card form-card">
-        <h3>Nova Venda</h3>
-        <form id="formVenda">
-          <label for="idVendaInput">ID da Venda / Localizador</label>
-          <input type="text" id="idVendaInput" placeholder="Ex: LOC-12345" required>
-
-          <label for="cliente">Nome do Cliente</label>
-          <input type="text" id="cliente" placeholder="Ex: João da Silva" required>
-
-          <label for="vendedor">Nome do Vendedor</label>
-          <input type="text" id="vendedor" placeholder="Ex: Carlos" required>
-          
-          <label for="tipoVenda">Tipo de Venda</label>
-          <select id="tipoVenda" required>
-            <option value="hospedagem">🏨 Hospedagem</option>
-            <option value="servico">✈️ Serviços (Aéreo, Transfer, etc)</option>
-          </select>
-
-          <label for="dataVenda">Data da Venda</label>
-          <input type="date" id="dataVenda" required>
-          
-          <label for="valor">Valor da Venda (R$)</label>
-          <input type="number" id="valor" step="0.01" placeholder="Ex: 1500.00" required>
-          
-          <button type="submit" class="btn-adicionar">Adicionar Venda</button>
-        </form>
-      </div>
-
-      <!-- Configuração de Ciclo -->
-      <div class="card config-card">
-        <h3>Ciclo de Comissão</h3>
-        <div class="input-group">
-          <div>
-            <label>Dia Abertura</label>
-            <input type="number" id="diaAbertura" min="1" max="31" value="26">
-          </div>
-          <div>
-            <label>Dia Fechamento</label>
-            <input type="number" id="diaFechamento" min="1" max="31" value="25">
-          </div>
+        <div class="card-header-toggle">
+          <h3>Nova Venda</h3>
+          <button type="button" id="btnToggleNovaVenda" class="btn-toggle" onclick="toggleNovaVendaPanel()" aria-expanded="true">Ocultar</button>
         </div>
-        <button onclick="salvarConfigCiclo()" class="btn-salvar">Salvar Ciclo</button>
-        <small>Define de quando até quando um mês é contabilizado.</small>
+        <div id="formVendaContainer">
+          <form id="formVenda">
+            <label for="idVendaInput">ID da Venda / Localizador</label>
+            <input type="text" id="idVendaInput" placeholder="Ex: LOC-12345" required>
+
+            <label for="cliente">Nome do Cliente</label>
+            <input type="text" id="cliente" placeholder="Ex: João da Silva" required>
+
+            <label for="vendedor">Nome do Vendedor</label>
+            <input type="text" id="vendedor" placeholder="Ex: Carlos" required>
+
+            <label for="tipoVenda">Tipo de Venda</label>
+            <select id="tipoVenda" required>
+              <option value="hospedagem">🏨 Hospedagem</option>
+              <option value="servico">✈️ Serviços</option>
+            </select>
+
+            <label for="dataVenda">Data da Venda</label>
+            <input type="date" id="dataVenda" required>
+
+            <label for="valor">Valor da Venda (R$)</label>
+            <input type="number" id="valor" step="0.01" placeholder="Ex: 1500.00" required>
+
+            <button type="submit" class="btn-adicionar">Adicionar Venda</button>
+          </form>
+        </div>
       </div>
 
-      <div class="card regras-card">
-        <h3>Regras de Comissão</h3>
-        <ul>
-          <li><strong>Serviços:</strong> Fixo em 3%</li>
-          <li><strong>Hospedagem (Variável):</strong></li>
-          <ul>
-            <li>Até R$ 100 mil: <strong>3%</strong></li>
-            <li>De 100k a 180k: <strong>4%</strong></li>
-            <li>Acima de 180k: <strong>5%</strong></li>
-          </ul>
-        </ul>
-      </div>
+
     </aside>
 
-    <!-- Conteúdo Principal -->
     <main class="main-content">
-      <header>
-        <h1>Controle Anual de Ciclos - <span id="anoAtual"></span></h1>
-        
-        <nav class="tabs">
-          <button class="tab-btn active" onclick="mudarAba('dashboard')">📊 Dashboard Resumo</button>
-          <button class="tab-btn" onclick="mudarAba('clientes')">👥 Vendas por Ciclo</button>
-        </nav>
+      <header class="main-header">
+        <div>
+          <p class="eyebrow">Resumo operacional</p>
+          <h1>Controle Comercial - <span id="anoAtual"></span></h1>
+        </div>
+        <div class="header-actions">
+          <button id="btnConfig" class="btn-config" title="Configurações">⚙️</button>
+          <button id="btnAtualizar" class="btn-refresh">Atualizar dados</button>
+        </div>
       </header>
 
-      <!-- ABA 1: Dashboard Resumo -->
-      <div id="aba-dashboard" class="aba-content">
-        <div class="meses-grid" id="mesesGrid">
-          <!-- Gerado via JavaScript -->
+      <div id="configModal" class="config-modal hidden">
+        <div class="config-modal-content">
+          <div class="config-modal-header">
+            <h3>Configurações</h3>
+            <button id="btnCloseConfig" class="btn-close">✕</button>
+          </div>
+          <div class="config-modal-body">
+            <div class="card config-card">
+              <h3>Configuração do Ciclo</h3>
+              <div class="input-group">
+                <div>
+                  <label>Dia Abertura</label>
+                  <input type="number" id="diaAbertura" min="1" max="31" value="26">
+                </div>
+                <div>
+                  <label>Dia Fechamento</label>
+                  <input type="number" id="diaFechamento" min="1" max="31" value="25">
+                </div>
+              </div>
+              <button onclick="salvarConfigCiclo()" class="btn-salvar">Salvar Ciclo</button>
+            </div>
+
+            <div class="card regras-card">
+              <h3>Regras de Comissão</h3>
+              <div class="rule-grid">
+                <label>Serviços (%)</label>
+                <input type="number" id="taxaServico" step="0.1" min="0">
+              </div>
+              <div class="rule-grid">
+                <label>Até <span id="limiar1Label">100 mil</span> (%)</label>
+                <input type="number" id="taxaBase" step="0.1" min="0">
+              </div>
+              <div class="rule-grid">
+                <label>Até <span id="limiar2Label">180 mil</span> (%)</label>
+                <input type="number" id="taxaIntermediaria" step="0.1" min="0">
+              </div>
+              <div class="rule-grid">
+                <label>Acima de <span id="limiar3Label">180 mil</span> (%)</label>
+                <input type="number" id="taxaAlta" step="0.1" min="0">
+              </div>
+              <button onclick="salvarConfigComissao()" class="btn-salvar">Salvar Regras</button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- ABA 2: Lista de Clientes -->
+      <nav class="tabs">
+        <button class="tab-btn active" onclick="mudarAba('dashboard')">📊 Dashboard</button>
+        <button class="tab-btn" onclick="mudarAba('clientes')">👥 Vendas por Ciclo</button>
+      </nav>
+
+      <section class="summary-cards">
+        <div class="summary-card">
+          <span>Total em vendas</span>
+          <strong id="totalVendasResumo">R$ 0,00</strong>
+        </div>
+        <div class="summary-card">
+          <span>Qtd. vendas</span>
+          <strong id="qtdVendasResumo">0</strong>
+        </div>
+        <div class="summary-card">
+          <span>Ticket médio</span>
+          <strong id="ticketMedioResumo">R$ 0,00</strong>
+        </div>
+        <div class="summary-card">
+          <span>Comissão total</span>
+          <strong id="comissaoResumo">R$ 0,00</strong>
+        </div>
+      </section>
+
+      <div id="aba-dashboard" class="aba-content">
+        <section class="dashboard-controls">
+          <div>
+            <label for="selectAno">Ano</label>
+            <select id="selectAno"></select>
+          </div>
+          <div>
+            <label for="selectMes">Mês</label>
+            <select id="selectMes">
+              <option value="">Resumo anual</option>
+            </select>
+          </div>
+          <button id="btnLimparMes" class="btn-refresh">Mostrar anual</button>
+        </section>
+
+        <section id="resumoAnual" class="resumo-anual"></section>
+        <section id="detalheMes" class="detalhe-mes hidden"></section>
+      </div>
+
       <div id="aba-clientes" class="aba-content hidden">
         <div class="clientes-header">
           <h2>Visualizar Vendas por Ciclo</h2>
-          <div class="filtro-container">
-            <label for="filtroMes">Selecione o Mês do Ciclo: </label>
+          <div class="filtro-controls">
+            <input type="search" id="buscaVenda" placeholder="Buscar cliente, vendedor ou ID">
+            <select id="filtroTipo">
+              <option value="todos">Todos os tipos</option>
+              <option value="hospedagem">Hospedagem</option>
+              <option value="servico">Serviços</option>
+            </select>
             <select id="filtroMes" onchange="renderizarListaClientes()">
-              <!-- Opções geradas pelo JS -->
+              <option value="todos">Todos os Ciclos</option>
             </select>
           </div>
         </div>
-        <div class="clientes-container" id="clientesGrid">
-          <!-- Gerado via JavaScript -->
-        </div>
+        <div class="clientes-container" id="clientesGrid"></div>
       </div>
-
     </main>
   </div>
 
