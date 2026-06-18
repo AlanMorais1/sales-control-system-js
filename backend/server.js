@@ -36,23 +36,29 @@ app.get('/vendas/resumo', (req, res) => {
 app.post('/vendas', (req, res) => {
   const { id, cliente, vendedor, tipo, data, valor } = req.body;
 
-  if (!id || !cliente || !vendedor || !tipo || !data || valor === undefined) {
-    return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios.' });
+  const idLimpo = String(id || '').trim();
+  const clienteLimpo = String(cliente || '').trim();
+  const vendedorLimpo = String(vendedor || '').trim();
+  const tipoLimpo = String(tipo || '').trim();
+  const dataLimpa = String(data || '').trim();
+  const valorNumerico = Number(valor);
+
+  if (!idLimpo || !clienteLimpo || !vendedorLimpo || !tipoLimpo || !dataLimpa || !Number.isFinite(valorNumerico) || valorNumerico <= 0) {
+    return res.status(400).json({ erro: 'Preencha todos os campos obrigatórios corretamente.' });
   }
 
-  if (vendas.some((v) => v.id.toLowerCase() === String(id).toLowerCase())) {
+  if (vendas.some((v) => v.id.toLowerCase() === idLimpo.toLowerCase())) {
     return res.status(409).json({ erro: 'Já existe uma venda com este ID.' });
   }
 
-  const valorNumerico = Number(valor);
-  const comissao = calcularComissao(tipo, valorNumerico);
+  const comissao = calcularComissao(tipoLimpo, valorNumerico);
 
   const venda = {
-    id: String(id),
-    cliente: String(cliente),
-    vendedor: String(vendedor),
-    tipo: String(tipo),
-    data: String(data),
+    id: idLimpo,
+    cliente: clienteLimpo,
+    vendedor: vendedorLimpo,
+    tipo: tipoLimpo,
+    data: dataLimpa,
     valor: valorNumerico,
     comissao,
   };
